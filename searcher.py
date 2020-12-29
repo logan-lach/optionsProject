@@ -32,14 +32,15 @@ def scrape():
 
     print(temp.current_url)
     soup = BeautifulSoup(temp.page_source, 'lxml')
-    for i in range(0,50):
-        print('CALLS FOR DECEMBER 31st')
-        other = soup.find('tr',class_='data-row'+str(i)+' Bgc($hoverBgColor):h BdT Bdc($seperatorColor) H(33px) in-the-money Bgc($hoverBgColor)').strings
-        t = list(other)
-        print(t)
-    for i in range(0,50):
-        print('PUTS FOR DECEMBER 31st')
-        other = soup.find()
+    print('CALLS FOR DECEMBER 31st')
+    other = soup.find('table',class_='calls W(100%) Pos(r) Bd(0) Pt(0) list-options').find_all('tr')
+    for x in other:
+        general = x.strings
+        quick = list(general)
+        print(quick)
+    #for i in range(0,50):
+        #print('PUTS FOR DECEMBER 31st')
+        #other = soup.find()
 
     #t = list(other)
     #print(t)
