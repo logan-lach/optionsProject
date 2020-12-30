@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait as UI
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchAttributeException, TimeoutException
 
 import lxml
 from bs4 import BeautifulSoup
@@ -39,14 +40,29 @@ def scrape(input):
         temp.get('https://finance.yahoo.com/quote/'+stock+'/')
         #Until we are able to click on this thing
         #It kind of sucks, it compromises performance but it straight up doesn't work if you don't use this to click
-        wait.until(con.element_to_be_clickable((By.LINK_TEXT, 'Options')))
+        try:
+            wait.until(con.element_to_be_clickable((By.LINK_TEXT, 'Options')))
         #Click it when its ready
-        link = temp.find_element_by_link_text('Options')
-        link.click()
+            link = temp.find_element_by_link_text('Options')
+            link.click()
+        except NoSuchAttributeException:
+            print('Options button doesnt exist, moving to next one\n')
+            continue
+        except TimeoutException:
+            print('Timed out when waiting/clicking the button, moving to the next one\n')
+            continue
+
 
         #WAIT UNTIL THE PUTS TABLE IS LOADED
         #Takes time with XPATH, looking to find any other tag so performance is improved
-        wait.until(con.presence_of_element_located((By.XPATH, '//*[@id="Col1-1-OptionContracts-Proxy"]/ section / section[2] / div[2] / div / table ')))
+        try:
+            wait.until(con.presence_of_element_located((By.XPATH, '//*[@id="Col1-1-OptionContracts-Proxy"]/ section / section[2] / div[2] / div / table ')))
+        except NoSuchAttributeException:
+            print('Could not find the puts table, moving to the next')
+            continue
+        except TimeoutException:
+            print('Timed out looking for the puts table, moving to the next one\n')
+            continue
 
         #Using beautifulsoup in order to parse the page, works like a charm
         soup = BeautifulSoup(temp.page_source, 'lxml')
