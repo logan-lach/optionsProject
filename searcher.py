@@ -66,11 +66,12 @@ def scrape(input):
 
         #Using beautifulsoup in order to parse the page, works like a charm
         soup = BeautifulSoup(temp.page_source, 'lxml')
+        print('FOR ' + stock + '\n')
         print('CALLS FOR DECEMBER 31st')
         other = soup.find('table',class_='calls W(100%) Pos(r) Bd(0) Pt(0) list-options').find_all('tr')
         #Just pulling the first 10 for now, will eventually move into the whole stack with database implementation
         #for x in other:
-        for i in range(0,10):
+        for i in range(0,3):
             #general = x.strings
             general = other[i].strings
             quick = list(general)
@@ -80,7 +81,7 @@ def scrape(input):
         other = soup.find('table',class_='puts W(100%) Pos(r) list-options').find_all('tr')
         print('PUTS FOR DECEMBER 31st')
         #for x in other:
-        for i in range(0,10):
+        for i in range(0,3):
             #general = x.strings
             general = other[i].strings
             quick = list(general)
@@ -93,5 +94,10 @@ def scrape(input):
 
 
 
-holder = ['BA']
-scrape(holder)
+file = open('S&P500.txt', 'r')
+actual = []
+for i in range(0,10):
+    actual.append(file.readline())
+start = time.time()
+scrape(actual)
+print('This took' +str(time.time() - start))
