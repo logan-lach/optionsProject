@@ -72,6 +72,7 @@ def scrape(input):
         print('CALLS FOR DECEMBER 31st')
         other = soup.find('table',class_='calls W(100%) Pos(r) Bd(0) Pt(0) list-options').find_all('tr')
         #Just pulling the first 10 for now, will eventually move into the whole stack with database implementation
+        hold = stock.replace('\n', '').replace('.','')
         for x in other:
         #for i in range(0,3):
 
@@ -81,10 +82,10 @@ def scrape(input):
             if(quick[0] != 'Contract Name'):
                 if (quick[8] == '-'):
                     values = (quick[0], 0,0,0)
-                    data.initializeDB(stock.replace('\n', '').replace('.',''),values)
+                    data.initializeDB(hold,values)
                 else:
                     values = (quick[0], quick[8],quick[8], quick[8])
-                    data.initializeDB(stock.replace('\n','').replace('.',''), values)
+                    data.initializeDB(hold, values)
 
 
 
@@ -98,10 +99,10 @@ def scrape(input):
             if (quick[0] != 'Contract Name'):
                 if (quick[8] == '-'):
                     values = [quick[0], 0, 0, 0]
-                    data.initializeDB(stock.replace('\n', '').replace('.',''),values)
+                    data.initializeDB(hold,values)
                 else:
                     values = [quick[0], quick[8], quick[8], quick[8]]
-                    data.initializeDB(stock.replace('\n', '').replace('.',''), values)
+                    data.initializeDB(hold, values)
 
 
 
