@@ -1,6 +1,7 @@
 
 import mysql.connector
 from mysql.connector import errorcode
+import os
 
 class Database:
 
@@ -11,10 +12,10 @@ class Database:
 
     def databaseConfig(self):
         try:
-            cnx = mysql.connector.connect(user='root',
-                                      password='SmokingWalnut58',  # Some boilerplate I have, dont touch it
-                                      host='127.0.0.1',
-                                      database='optionsTracker',
+            cnx = mysql.connector.connect(user=str(os.environ.get('USER')),
+                                      password=str(os.environ.get('PASSWORD')),  # Some boilerplate I have, dont touch it
+                                      host=str(os.environ.get('HOST')),
+                                      database=str(os.environ.get('DATABASE'))
                                       )
             return cnx
         except mysql.connector.Error as err:
@@ -25,6 +26,11 @@ class Database:
             else:
                 print(err)
                 return cnx
+    def testAccess(self):
+        command = 'SELECT * FROM $AMD'
+        self.cursor.execute(command)
+        for x in self.cursor:
+            print(x)
 
     def testReading(self):
         file = open('S&P500.txt', 'r')
@@ -34,8 +40,14 @@ class Database:
             print(value)
             value = file.readline()
 
-    def initializeDB(self, stockname, values):
-        command = 'INSERT INTO ' + '$'+stockname + ' VALUES (%s,%s,%s,%s)'
+    def analyzeDB(self, stockname, values):
+        command = 'SELECT * FROM ' + '$' + stockname
+        results = []
+        for x in self.cursor:
+            results.append(x)
+
+
+        #command = 'INSERT INTO ' + '$'+stockname + ' VALUES (%s,%s,%s,%s)'
         self.cursor.execute(command,(values[0], values[1],values[2],values[3]))
         #self.connection.commit()
     def createTables(self):
@@ -61,6 +73,8 @@ class Database:
     def close(self):
         self.cursor.close()
         self.connection.close()
+db = Database()
+db.testAccess()
 
 
 
