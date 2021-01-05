@@ -15,7 +15,7 @@ class Database:
                                       password='SmokingWalnut58',  # Some boilerplate I have, dont touch it
                                       host='127.0.0.1',
                                       database='optionsTracker',
-                                      auth_plugin='mysql_native_password')
+                                      )
             return cnx
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -34,27 +34,34 @@ class Database:
             print(value)
             value = file.readline()
 
+    def initializeDB(self, stockname, values):
+        command = 'INSERT INTO ' + '$'+stockname + ' VALUES (%s,%s,%s,%s)'
+        self.cursor.execute(command,(values[0], values[1],values[2],values[3]))
+        #self.connection.commit()
     def createTables(self):
         file = open('S&P500.txt', 'r')
-        currentStock = file.readline()
+        currentStock = file.readline().replace('\n','').replace('.','')
         count = 0
         while(currentStock != ''):
             try:
-                command = 'CREATE TABLE ' + currentStock + '(' \
-                  'tradeID VARCHAR(30),' \
-                  'weeklyVolume INT,' \
-                  'yesterdayVolume INT,' \
-                  'todayVolume INT);'
-                self.cursor.execute(command,[])
+                command = 'CREATE TABLE ' + '$' + currentStock + '(' \
+                  'tradeID VARCHAR(35),' \
+                  'weeklyVolume VARCHAR(10),' \
+                  'yesterdayVolume VARCHAR(10),' \
+                  'todayVolume VARCHAR(10), PRIMARY KEY (tradeID));'
+                self.cursor.execute(command)
 
             except mysql.connector.ProgrammingError:
-                print(currentStock + ' Already exists, moving on')
-            currentStock = file.readline()
+              print(currentStock + ' Already exists, moving on')
+            currentStock = file.readline().replace('\n','').replace('.','')
             count += 1
 
         self.cursor.close()
         self.connection.close()
+    def close(self):
+        self.cursor.close()
+        self.connection.close()
 
 
-db = Database()
-db.createTables()
+
+

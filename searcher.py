@@ -12,6 +12,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchAttributeException, TimeoutException
+import DatabaseConfig
 
 import lxml
 from bs4 import BeautifulSoup
@@ -33,7 +34,8 @@ def scrape(input):
 
     temp = web.Chrome(driver, desired_capabilities=capa, options=chrome_options)
     #3 seconds max on timeout, have to give leway for internet usage
-    wait = UI(temp, 3)
+    wait = UI(temp, 6)
+    data = DatabaseConfig.Database()
     #For every single stock we want to look at
     for stock in input:
         #get the website we want
@@ -70,34 +72,57 @@ def scrape(input):
         print('CALLS FOR DECEMBER 31st')
         other = soup.find('table',class_='calls W(100%) Pos(r) Bd(0) Pt(0) list-options').find_all('tr')
         #Just pulling the first 10 for now, will eventually move into the whole stack with database implementation
-        #for x in other:
-        for i in range(0,3):
-            #general = x.strings
-            general = other[i].strings
+        for x in other:
+        #for i in range(0,3):
+
+            general = x.strings
+            #general = other[i].strings
             quick = list(general)
-            print(quick)
+            if(quick[0] != 'Contract Name'):
+                if (quick[8] == '-'):
+                    values = (quick[0], 0,0,0)
+                    data.initializeDB(stock.replace('\n', '').replace('.',''),values)
+                else:
+                    values = (quick[0], quick[8],quick[8], quick[8])
+                    data.initializeDB(stock.replace('\n','').replace('.',''), values)
+
 
 
         other = soup.find('table',class_='puts W(100%) Pos(r) list-options').find_all('tr')
         print('PUTS FOR DECEMBER 31st')
-        #for x in other:
-        for i in range(0,3):
-            #general = x.strings
-            general = other[i].strings
+        for x in other:
+        #for i in range(0,3):
+            general = x.strings
+            #general = other[i].strings
             quick = list(general)
-            print(quick)
+            if (quick[0] != 'Contract Name'):
+                if (quick[8] == '-'):
+                    values = [quick[0], 0, 0, 0]
+                    data.initializeDB(stock.replace('\n', '').replace('.',''),values)
+                else:
+                    values = [quick[0], quick[8], quick[8], quick[8]]
+                    data.initializeDB(stock.replace('\n', '').replace('.',''), values)
+
 
 
 
     temp.close()
     temp.quit()
+    data.close()
 
 
 
 file = open('S&P500.txt', 'r')
 actual = []
-for i in range(0,10):
-    actual.append(file.readline())
-start = time.time()
-scrape(actual)
-print('This took' +str(time.time() - start))
+currStock = file.readline()
+count = 0
+while(currStock != ''):
+    actual.append(currStock)
+    currStock = file.readline()
+    if(count % 10 == 1 and count != 0):
+        start = time.time()
+        scrape(actual)
+        print('This took' +str(time.time() - start))
+        actual = []
+        time.sleep(3)
+    count += 1
