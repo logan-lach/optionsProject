@@ -9,6 +9,11 @@ class alertSystem:
     def addMessage(self,message):
         self.messages.append(message)
 
+    def testoutput(self):
+        file = open('output.txt', 'w')
+        for x in self.messages:
+            file.write(file + '\n')
+
     def sendMessages(self):
         with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             smtp.ehlo()
@@ -29,8 +34,6 @@ class alertSystem:
 
             smtp.sendmail(e,'lwlach123@gmail.com',str(msg))
 
-a = alertSystem()
-a.addMessage('This is a test!')
-a.sendMessages()
+
 
 

@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchAttributeException, TimeoutException
 import DatabaseConfig
+import alertSystem
 
 import lxml
 from bs4 import BeautifulSoup
@@ -23,7 +24,7 @@ driver = '/Users/loganlach/PycharmProjects/chromedriver'
 #CHOSE TO DO THIS PROjECT IN SELENIUM FOR TWO REASONS
 #!.) Because I already can do beautifulsoup, so i want to learn something new
 #2.) Thats about it, but im thinking of adding functionallity later of checking stocktwits so stay tuned
-def scrape(input):
+def scrape(input, email):
     #Specs for how we are gonna run selenium
     #YAHOO Finance takes forever to load, so we are gonna wait on our own terms
     capa = DesiredCapabilities.CHROME
@@ -79,13 +80,16 @@ def scrape(input):
             general = x.strings
             #general = other[i].strings
             quick = list(general)
+            val = ''
             if(quick[0] != 'Contract Name'):
                 if (quick[8] == '-'):
-                    values = (quick[0], 0,0,0)
-                    data.initializeDB(hold,values)
+                    values = (quick[0],str(0))
+                    val = data.analyzeDB(hold,values)
                 else:
-                    values = (quick[0], quick[8],quick[8], quick[8])
-                    data.initializeDB(hold, values)
+                    values = (quick[0], str(quick[8]))
+                    val = data.analyzeDB(hold, values)
+            if val != '':
+                email.addMessage(val)
 
 
 
@@ -96,19 +100,23 @@ def scrape(input):
             general = x.strings
             #general = other[i].strings
             quick = list(general)
+            val = ''
             if (quick[0] != 'Contract Name'):
                 if (quick[8] == '-'):
-                    values = [quick[0], 0, 0, 0]
-                    data.initializeDB(hold,values)
+                    values = [quick[0],str(0)]
+                    val = data.analyzeDB(hold,values)
                 else:
-                    values = [quick[0], quick[8], quick[8], quick[8]]
-                    data.initializeDB(hold, values)
+                    values = [quick[0], str(quick[8])]
+                    val = data.analyzeDB(hold, values)
+            if val != '':
+                email.addMessage(val)
 
 
 
 
     temp.close()
     temp.quit()
+    data.connection.commit()
     data.close()
 
 
@@ -117,13 +125,15 @@ file = open('S&P500.txt', 'r')
 actual = []
 currStock = file.readline()
 count = 0
+email = alertSystem.alertSystem()
 while(currStock != ''):
     actual.append(currStock)
     currStock = file.readline()
     if(count % 10 == 1 and count != 0):
-        start = time.time()
-        scrape(actual)
-        print('This took' +str(time.time() - start))
+        #start = time.time()
+        scrape(actual,email)
+        #print('This took' +str(time.time() - start))
         actual = []
         time.sleep(3)
     count += 1
+email.testoutput()
